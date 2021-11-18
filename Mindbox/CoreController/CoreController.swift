@@ -89,7 +89,7 @@ class CoreController {
             return
         }
         persistenceStorage.configuration?.previousDeviceUUID = deviceUUID
-        checkNotificationStatus()
+//        checkNotificationStatus()
     }
 
     private var installSemathore = DispatchSemaphore(value: 1)
