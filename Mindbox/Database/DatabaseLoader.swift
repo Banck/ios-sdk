@@ -22,15 +22,15 @@ class DataBaseLoader {
         MBPersistentContainer.applicationGroupIdentifier = applicationGroupIdentifier
         let momdName = Constants.Database.mombName
 
-        #if SWIFT_PACKAGE
-        guard let modelURL = Bundle.module.url(forResource: momdName, withExtension: "momd") else {
-            throw MBDatabaseError.unableCreateDatabaseModel
-        }
-        #else
+//        #if SWIFT_PACKAGE
+//        guard let modelURL = Bundle.module.url(forResource: momdName, withExtension: "momd") else {
+//            throw MBDatabaseError.unableCreateDatabaseModel
+//        }
+//        #else
         guard let modelURL = Bundle(for: DataBaseLoader.self).url(forResource: momdName, withExtension: "momd") else {
             throw MBDatabaseError.unableCreateDatabaseModel
         }
-        #endif
+//        #endif
 
         guard let managedObjectModel = NSManagedObjectModel(contentsOf: modelURL) else {
             throw MBDatabaseError.unableCreateManagedObjectModel(with: modelURL)
