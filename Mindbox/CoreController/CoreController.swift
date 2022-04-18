@@ -195,7 +195,7 @@ class CoreController {
 
         sessionManager.sessionHandler = { [weak self] isActive in
             if isActive {
-                self?.checkNotificationStatus()
+//                self?.checkNotificationStatus()
             }
         }
 
