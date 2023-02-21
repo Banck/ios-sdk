@@ -7,6 +7,9 @@
 //
 
 import Foundation
+#if SWIFT_PACKAGE
+import SDKVersionProvider
+#endif
 
 class MBUtilitiesFetcher {
     
@@ -31,7 +34,7 @@ class MBUtilitiesFetcher {
             #if targetEnvironment(simulator)
             return ""
             #else
-            let message = "containerURL not found for group: \(identifier)"
+            let message = "AppGroup for \(hostApplicationName) not found. Add AppGroup with value: \(identifier)"
             fatalError(message)
             #endif
         }
@@ -57,7 +60,7 @@ class MBUtilitiesFetcher {
     }
     
     var sdkVersion: String? {
-        sdkBundle.object(forInfoDictionaryKey:"CFBundleShortVersionString") as? String
+        SDKVersionProvider.sdkVersion
     }
     
     var hostApplicationName: String? {

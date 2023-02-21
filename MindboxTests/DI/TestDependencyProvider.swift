@@ -11,7 +11,8 @@ import XCTest
 @testable import Mindbox
 
 final class TestDependencyProvider: DependencyContainer {
-    
+    var inAppTargetingChecker: InAppTargetingChecker
+    let inAppMessagesManager: InAppCoreManagerProtocol
     let utilitiesFetcher: UtilitiesFetcher
     let persistenceStorage: PersistenceStorage
     let databaseLoader: DataBaseLoader
@@ -20,11 +21,13 @@ final class TestDependencyProvider: DependencyContainer {
     let authorizationStatusProvider: UNAuthorizationStatusProviding
     let sessionManager: SessionManager
     let instanceFactory: InstanceFactory
+    let uuidDebugService: UUIDDebugService
     
     init() throws {
         utilitiesFetcher = MBUtilitiesFetcher()
         persistenceStorage = MockPersistenceStorage()
         databaseLoader = try DataBaseLoader()
+        inAppTargetingChecker = InAppTargetingChecker()
         let persistentContainer = try databaseLoader.loadPersistentContainer()
         databaseRepository = try MockDatabaseRepository(persistentContainer: persistentContainer)
         instanceFactory = MockInstanceFactory(
@@ -39,6 +42,9 @@ final class TestDependencyProvider: DependencyContainer {
         )
         authorizationStatusProvider = MockUNAuthorizationStatusProvider(status: .authorized)
         sessionManager = SessionManager(trackVisitManager: instanceFactory.makeTrackVisitManager())
+        inAppTargetingChecker = InAppTargetingChecker()
+        inAppMessagesManager = InAppCoreManagerMock()
+        uuidDebugService = MockUUIDDebugService()
     }
 
 }

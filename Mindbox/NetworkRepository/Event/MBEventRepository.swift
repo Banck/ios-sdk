@@ -27,7 +27,7 @@ class MBEventRepository: EventRepository {
             completion(.failure(error))
             return
         }
-        guard let deviceUUID = configuration.previousDeviceUUID else {
+        guard let deviceUUID = persistenceStorage.deviceUUID else {
             let error = MindboxError(.init(
                 errorKey: .invalidConfiguration,
                 reason: "DeviceUUID is not set"
@@ -53,7 +53,7 @@ class MBEventRepository: EventRepository {
             completion(.failure(error))
             return
         }
-        guard let deviceUUID = configuration.previousDeviceUUID else {
+        guard let deviceUUID = persistenceStorage.deviceUUID else {
             let error = MindboxError(.init(
                 errorKey: .invalidConfiguration,
                 reason: "DeviceUUID is not set"
@@ -67,7 +67,7 @@ class MBEventRepository: EventRepository {
             deviceUUID: deviceUUID
         )
         let route = makeRoute(wrapper: wrapper)
-        fetcher.request(type: type, route: route, completion: { result in
+        fetcher.request(type: type, route: route, needBaseResponse: true, completion: { result in
             DispatchQueue.main.async {
                 switch result {
                 case let .failure(error):
@@ -84,7 +84,9 @@ class MBEventRepository: EventRepository {
         case .installed,
              .infoUpdated,
              .trackClick,
-             .installedWithoutCustomer:
+             .installedWithoutCustomer,
+             .inAppViewEvent,
+             .inAppClickEvent:
             return EventRoute.asyncEvent(wrapper)
         case .customEvent:
             return EventRoute.customAsyncEvent(wrapper)

@@ -18,6 +18,7 @@ public struct MBConfiguration: Codable {
     public var previousDeviceUUID: String?
     public var subscribeCustomerIfCreated: Bool
     public var shouldCreateCustomer: Bool
+    let uuidDebugEnabled: Bool
 
     /// Init with params
     ///
@@ -27,6 +28,7 @@ public struct MBConfiguration: Codable {
     /// - Parameter previousDeviceUUID: Used instead of the generated value
     /// - Parameter subscribeCustomerIfCreated: Flag which determines subscription status of the user. Default value is `false`.
     /// - Parameter shouldCreateCustomer: Flag which determines create or not anonymous users. Usable only during first initialisation. Default value is `true`.
+    /// - Parameter uuidDebugEnabled: Flag which determines if uuid debugging functionality is enabled. Default value is `true`.
     ///
     /// - Throws:`MindboxError.internalError` for invalid initialization parameters
     public init(
@@ -35,7 +37,8 @@ public struct MBConfiguration: Codable {
         previousInstallationId: String? = nil,
         previousDeviceUUID: String? = nil,
         subscribeCustomerIfCreated: Bool = false,
-        shouldCreateCustomer: Bool = true
+        shouldCreateCustomer: Bool = true,
+        uuidDebugEnabled: Bool = true
     ) throws {
         self.endpoint = endpoint
         self.domain = domain
@@ -74,6 +77,7 @@ public struct MBConfiguration: Codable {
         
         self.subscribeCustomerIfCreated = subscribeCustomerIfCreated
         self.shouldCreateCustomer = shouldCreateCustomer
+        self.uuidDebugEnabled = uuidDebugEnabled
     }
 
     /// Init with plist file
@@ -138,6 +142,7 @@ public struct MBConfiguration: Codable {
         case previousDeviceUUID
         case subscribeCustomerIfCreated
         case shouldCreateCustomer
+        case uuidDebugEnabled
     }
 
     public init(from decoder: Decoder) throws {
@@ -158,13 +163,43 @@ public struct MBConfiguration: Codable {
         }
         let subscribeCustomerIfCreated = try values.decodeIfPresent(Bool.self, forKey: .subscribeCustomerIfCreated) ?? false
         let shouldCreateCustomer = try values.decodeIfPresent(Bool.self, forKey: .shouldCreateCustomer) ?? true
+        let uuidDebugEnabled = try values.decodeIfPresent(Bool.self, forKey: .uuidDebugEnabled) ?? true
         try self.init(
             endpoint: endpoint,
             domain: domain,
             previousInstallationId: previousInstallationId,
             previousDeviceUUID: previousDeviceUUID,
             subscribeCustomerIfCreated: subscribeCustomerIfCreated,
-            shouldCreateCustomer: shouldCreateCustomer
+            shouldCreateCustomer: shouldCreateCustomer,
+            uuidDebugEnabled: uuidDebugEnabled
         )
     }
+}
+
+struct ConfigValidation {
+
+    struct ChangedState: OptionSet {
+        let rawValue: Int
+
+        static let none                 = ChangedState(rawValue: 1 << 0)
+        static let endpoint             = ChangedState(rawValue: 1 << 1)
+        static let domain               = ChangedState(rawValue: 1 << 2)
+        static let shouldCreateCustomer = ChangedState(rawValue: 1 << 3)
+
+        /// Change affecting the REST API for the application
+        static let rest: ChangedState = [.endpoint, .domain]
+    }
+
+    var changedState: ChangedState = .none
+
+    mutating func compare(_ lhs: MBConfiguration?, _ rhs: MBConfiguration?) {
+        if !(lhs?.domain == rhs?.domain && lhs?.endpoint == rhs?.endpoint) {
+            changedState = .rest
+        } else if !(lhs?.shouldCreateCustomer == rhs?.shouldCreateCustomer) {
+            changedState = .shouldCreateCustomer
+        } else {
+            changedState = .none
+        }
+    }
+
 }
